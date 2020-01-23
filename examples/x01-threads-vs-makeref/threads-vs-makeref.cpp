@@ -47,7 +47,8 @@ public:
 	ExampleCubes(const char* _name, const char* _description, const char* _url)
 		: entry::AppI(_name, _description, _url)
 		, m_pt(0)
-		, m_singlethread(false)
+		//, m_singleThread(false)
+		, m_makeRef(true)
 	{
 	}
 
@@ -195,7 +196,8 @@ public:
 				, 0
 				);
 
-			ImGui::Checkbox("Single-threaded\n(requires restart)", &m_singlethread);
+			//ImGui::Checkbox("Single-threaded\n(requires restart)", &m_singleThread);
+			ImGui::Checkbox("Use makeRef\n(else: copy)", &m_makeRef);
 
 			ImGui::End();
 
@@ -238,8 +240,9 @@ public:
 			bgfx::update(
 				m_vbh
 				,0
-				//,bgfx::copy(s_triVerts, sizeof(s_triVerts))
-				,bgfx::makeRef(s_triVerts, sizeof(s_triVerts) )
+				,m_makeRef ?
+					bgfx::makeRef(s_triVerts, sizeof(s_triVerts))
+					: bgfx::copy(s_triVerts, sizeof(s_triVerts))
 				);
 
 			// Submit the triangles
@@ -276,7 +279,8 @@ public:
 	int64_t m_timeOffset;
 	int32_t m_pt;
 
-	bool m_singlethread;
+	//bool m_singleThread; // TODO: implement this. For now, the makeRef flag is enough.
+	bool m_makeRef;
 };
 
 } // namespace
