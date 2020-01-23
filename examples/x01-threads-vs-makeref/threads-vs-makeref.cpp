@@ -215,8 +215,6 @@ public:
 
 			imguiEndFrame();
 
-			float time = (float)( (bx::getHPCounter()-m_timeOffset)/double(bx::getHPFrequency() ) );
-
 			const bx::Vec3 at  = { 0.0f, 0.0f,   0.0f };
 			const bx::Vec3 eye = { 0.0f, 0.0f, -35.0f };
 
@@ -249,31 +247,17 @@ public:
 				// render as triangle list
 				;
 
-			// Submit 11x11 cubes.
-			for (uint32_t yy = 0; yy < 11; ++yy)
-			{
-				for (uint32_t xx = 0; xx < 11; ++xx)
-				{
-					float mtx[16];
-					bx::mtxRotateXY(mtx, time + xx*0.21f, time + yy*0.37f);
-					mtx[12] = -15.0f + float(xx)*3.0f;
-					mtx[13] = -15.0f + float(yy)*3.0f;
-					mtx[14] = 0.0f;
+			// Submit the triangles
 
-					// Set model matrix for rendering.
-					bgfx::setTransform(mtx);
+			// Set vertex and index buffer.
+			bgfx::setVertexBuffer(0, m_vbh);
+			bgfx::setIndexBuffer(m_ibh);
 
-					// Set vertex and index buffer.
-					bgfx::setVertexBuffer(0, m_vbh);
-					bgfx::setIndexBuffer(m_ibh);
+			// Set render states.
+			bgfx::setState(state);
 
-					// Set render states.
-					bgfx::setState(state);
-
-					// Submit primitive for rendering to view 0.
-					bgfx::submit(0, m_program);
-				}
-			}
+			// Submit primitive for rendering to view 0.
+			bgfx::submit(0, m_program);
 
 			// Advance to next frame. Rendering thread will be kicked to
 			// process submitted rendering primitives.
