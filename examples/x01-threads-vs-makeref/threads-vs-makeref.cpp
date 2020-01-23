@@ -157,7 +157,7 @@ public:
 
 				baseX += width;
 
-				for (int n=0; n<100000; ++n) {
+				for (int n=0; n<100 * r * r * r; ++n) {
 					printf("%s", "");
 				}
 			}
