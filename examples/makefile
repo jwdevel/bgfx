@@ -4,7 +4,7 @@
 #
 
 rebuild:
-	@make -s --no-print-directory rebuild -C x01-threads-vs-makeref
+	@make rebuild -C x01-threads-vs-makeref
 	@make -s --no-print-directory rebuild -C 01-cubes
 	@make -s --no-print-directory rebuild -C 02-metaballs
 	@make -s --no-print-directory rebuild -C 03-raymarch

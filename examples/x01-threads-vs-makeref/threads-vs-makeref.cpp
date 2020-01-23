@@ -103,25 +103,6 @@ static const uint16_t s_cubePoints[] =
 	0, 1, 2, 3, 4, 5, 6, 7
 };
 
-static const char* s_ptNames[]
-{
-	"Triangle List",
-	"Triangle Strip",
-	"Lines",
-	"Line Strip",
-	"Points",
-};
-
-static const uint64_t s_ptState[]
-{
-	UINT64_C(0),
-	BGFX_STATE_PT_TRISTRIP,
-	BGFX_STATE_PT_LINES,
-	BGFX_STATE_PT_LINESTRIP,
-	BGFX_STATE_PT_POINTS,
-};
-BX_STATIC_ASSERT(BX_COUNTOF(s_ptState) == BX_COUNTOF(s_ptNames) );
-
 class ExampleCubes : public entry::AppI
 {
 public:
@@ -171,33 +152,9 @@ public:
 			);
 
 		// Create static index buffer for triangle list rendering.
-		m_ibh[0] = bgfx::createIndexBuffer(
+		m_ibh = bgfx::createIndexBuffer(
 			// Static data can be passed with bgfx::makeRef
 			bgfx::makeRef(s_cubeTriList, sizeof(s_cubeTriList) )
-			);
-
-		// Create static index buffer for triangle strip rendering.
-		m_ibh[1] = bgfx::createIndexBuffer(
-			// Static data can be passed with bgfx::makeRef
-			bgfx::makeRef(s_cubeTriStrip, sizeof(s_cubeTriStrip) )
-			);
-
-		// Create static index buffer for line list rendering.
-		m_ibh[2] = bgfx::createIndexBuffer(
-			// Static data can be passed with bgfx::makeRef
-			bgfx::makeRef(s_cubeLineList, sizeof(s_cubeLineList) )
-			);
-
-		// Create static index buffer for line strip rendering.
-		m_ibh[3] = bgfx::createIndexBuffer(
-			// Static data can be passed with bgfx::makeRef
-			bgfx::makeRef(s_cubeLineStrip, sizeof(s_cubeLineStrip) )
-			);
-
-		// Create static index buffer for point list rendering.
-		m_ibh[4] = bgfx::createIndexBuffer(
-			// Static data can be passed with bgfx::makeRef
-			bgfx::makeRef(s_cubePoints, sizeof(s_cubePoints) )
 			);
 
 		// Create program from shaders.
@@ -213,11 +170,7 @@ public:
 		imguiDestroy();
 
 		// Cleanup.
-		for (uint32_t ii = 0; ii < BX_COUNTOF(m_ibh); ++ii)
-		{
-			bgfx::destroy(m_ibh[ii]);
-		}
-
+		bgfx::destroy(m_ibh);
 		bgfx::destroy(m_vbh);
 		bgfx::destroy(m_program);
 
@@ -258,9 +211,6 @@ public:
 
 			ImGui::Checkbox("Single-threaded\n(requires restart)", &m_singlethread);
 
-			ImGui::Text("Primitive topology:");
-			ImGui::Combo("", (int*)&m_pt, s_ptNames, BX_COUNTOF(s_ptNames) );
-
 			ImGui::End();
 
 			imguiEndFrame();
@@ -287,7 +237,6 @@ public:
 			// if no other draw calls are submitted to view 0.
 			bgfx::touch(0);
 
-			bgfx::IndexBufferHandle ibh = m_ibh[m_pt];
 			uint64_t state = 0
 				| BGFX_STATE_WRITE_R
 				| BGFX_STATE_WRITE_G
@@ -297,7 +246,7 @@ public:
 				| BGFX_STATE_DEPTH_TEST_LESS
 				| BGFX_STATE_CULL_CW
 				| BGFX_STATE_MSAA
-				| s_ptState[m_pt]
+				// render as triangle list
 				;
 
 			// Submit 11x11 cubes.
@@ -316,7 +265,7 @@ public:
 
 					// Set vertex and index buffer.
 					bgfx::setVertexBuffer(0, m_vbh);
-					bgfx::setIndexBuffer(ibh);
+					bgfx::setIndexBuffer(m_ibh);
 
 					// Set render states.
 					bgfx::setState(state);
@@ -343,7 +292,7 @@ public:
 	uint32_t m_debug;
 	uint32_t m_reset;
 	bgfx::VertexBufferHandle m_vbh;
-	bgfx::IndexBufferHandle m_ibh[BX_COUNTOF(s_ptState)];
+	bgfx::IndexBufferHandle m_ibh;
 	bgfx::ProgramHandle m_program;
 	int64_t m_timeOffset;
 	int32_t m_pt;
