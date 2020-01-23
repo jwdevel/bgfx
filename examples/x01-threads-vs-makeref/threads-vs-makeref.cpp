@@ -124,6 +124,13 @@ public:
 		return 0;
 	}
 
+	void slowSpin(int count) {
+		// Waste some time.
+		for (int n=0; n<count; ++n) {
+			printf("%s", "");
+		}
+	}
+
 	void fillTriangles() {
 		static bool s_doShift = true;
 		s_doShift = !s_doShift;
@@ -146,21 +153,23 @@ public:
 				v0.m_z = 0.0f;
 				v0.m_abgr = 0xff00ffff;
 
+				slowSpin(20 * r * r * r);
+
 				v1.m_x = baseX + 1.0f;
 				v1.m_y = baseY + 0.0f;
 				v1.m_z = 0.0f;
 				v1.m_abgr = 0xff00ffff;
+
+				slowSpin(20 * r * r * r);
 
 				v2.m_x = baseX + 0.0f;
 				v2.m_y = baseY + 1.0f;
 				v2.m_z = 0.0f;
 				v2.m_abgr = 0xff00ffff;
 
-				baseX += width;
+				slowSpin(20 * r * r * r);
 
-				for (int n=0; n<100 * r * r * r; ++n) {
-					printf("%s", "");
-				}
+				baseX += width;
 			}
 			baseY += height;
 			baseX = startX;
