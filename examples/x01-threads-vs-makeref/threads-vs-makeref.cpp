@@ -36,9 +36,10 @@ bgfx::VertexLayout PosColorVertex::ms_layout;
 constexpr uint16_t kNumTrisAcross = 15;
 constexpr uint16_t kNumTrisDown = 30;
 constexpr uint16_t kNumTriangles = kNumTrisAcross * kNumTrisDown;
+constexpr uint16_t kNumVerts = 3 * kNumTriangles;
 
 static PosColorVertex s_triVerts[kNumTrisDown][kNumTrisAcross * 3];
-static uint16_t s_triIndices[kNumTriangles * 3];
+static uint16_t s_triIndices[kNumVerts];
 
 class ExampleCubes : public entry::AppI
 {
@@ -88,9 +89,8 @@ public:
 		}
 
 		// Create static vertex buffer.
-		m_vbh = bgfx::createVertexBuffer(
-			// Static data can be passed with bgfx::makeRef
-			  bgfx::makeRef(s_triVerts, sizeof(s_triVerts) )
+		m_vbh = bgfx::createDynamicVertexBuffer(
+			kNumVerts
 			, PosColorVertex::ms_layout
 			);
 
@@ -124,12 +124,13 @@ public:
 	}
 
 	void fillTriangles() {
-		//static bool s_doShift = false;
+		static bool s_doShift = true;
+		s_doShift = !s_doShift;
 
 		const float width = 1.2f;
 		const float height = 1.2f;
 
-		float startX = -18.0f;
+		float startX = -18.0f + (s_doShift ? 20.0f : 0.0f);
 		float startY = -17.0f;
 		float baseX = startX;
 		float baseY = startY;
@@ -155,6 +156,10 @@ public:
 				v2.m_abgr = 0xff00ffff;
 
 				baseX += width;
+
+				for (int n=0; n<100000; ++n) {
+					printf("%s", "");
+				}
 			}
 			baseY += height;
 			baseX = startX;
@@ -228,6 +233,15 @@ public:
 				// render as triangle list
 				;
 
+			// Update the triangles
+			fillTriangles();
+			bgfx::update(
+				m_vbh
+				,0
+				//,bgfx::copy(s_triVerts, sizeof(s_triVerts))
+				,bgfx::makeRef(s_triVerts, sizeof(s_triVerts) )
+				);
+
 			// Submit the triangles
 
 			// Set vertex and index buffer.
@@ -256,7 +270,7 @@ public:
 	uint32_t m_height;
 	uint32_t m_debug;
 	uint32_t m_reset;
-	bgfx::VertexBufferHandle m_vbh;
+	bgfx::DynamicVertexBufferHandle m_vbh;
 	bgfx::IndexBufferHandle m_ibh;
 	bgfx::ProgramHandle m_program;
 	int64_t m_timeOffset;
